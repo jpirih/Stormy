@@ -96,12 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toggleRefresh();
-                    }
-                });
                 try {
                     String jsonData = response.body().string();
                     if (response.isSuccessful()) {
@@ -138,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateDisplay() {
+        toggleRefresh();
         mTemperatureLabel.setText(mCurrentWeather.getTemperature() + "");
         mTimeLabel.setText("Danes ob " + mCurrentWeather.getFormattedTime());
         mLocationLabel.setText("Cerkno SI");
