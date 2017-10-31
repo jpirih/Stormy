@@ -97,8 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     .url(forecastUrl)
                     .build();
 
-            Call call = client.newCall(request);
-            call.enqueue(new Callback() {
+            client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     runOnUiThread(new Runnable() {
