@@ -30,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -78,8 +79,17 @@ public class MainActivity extends AppCompatActivity {
         String apiKey = "42f999f60e30c77921e532020c5ff3e6";
         double latitude = 46.056946;
         double longitude = 14.505751;
-        String forecastUrl = "https://api.darksky.net/forecast/" + apiKey +
-                "/" + latitude + "," + longitude + "?lang=sl&units=si";
+        HttpUrl forecastUrl = new HttpUrl.Builder()
+                .scheme("https")
+                .host("api.darksky.net")
+                .addPathSegment("forecast")
+                .addPathSegment(apiKey)
+                .addPathSegment(latitude + "," + longitude)
+                .addQueryParameter("lang", "sl")
+                .addQueryParameter("units", "si")
+                .build();
+
+
 
         if (isNetworkAvailable()) {
             OkHttpClient client = new OkHttpClient();
