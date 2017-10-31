@@ -1,12 +1,17 @@
 package com.kekec_apps.stormy;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -14,6 +19,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -25,20 +32,31 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     // member varialbes
     private CurrentWeather mCurrentWeather;
+    @BindView(R.id.timeTextView) TextView mTimeLabel;
+    @BindView(R.id.temperatureTextView) TextView mTemperatureLabel;
+    @BindView(R.id.humidityValue) TextView mHumidityValue;
+    @BindView(R.id.precipValue) TextView mPrecipValue;
+    @BindView(R.id.summaryLabel) TextView mSummaryLabel;
+    @BindView(R.id.iconImageView) ImageView mIconImageView;
+    @BindView(R.id.locationTextView) TextView mLocationLabel;
+    @BindView(R.id.refreshimageView) ImageView mRefreshImageView;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // connection data
-        String apiKey = "42f999f60e30c77921e532020c5ff3e6";
-        double latitude = 37.8267;
-        double longitude = -122.4233;
-        String forecastUrl = "https://api.darksky.net/forecast/" + apiKey +
-                "/" + latitude + "," + longitude + "?LANG=sl";
+        ButterKnife.bind(this);
+        mProgressBar.setVisibility(View.INVISIBLE);
 
         if (isNetworkAvailable()) {
-            getWeatherData(forecastUrl);
+            mRefreshImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getForecast();
+                }
+            });
+            getForecast();
         }
         else {
             Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
@@ -49,7 +67,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     // methods
-    private void getWeatherData(String forecastUrl) {
+    private void getForecast() {
+        toggleRefresh();
+        // connection data
+        String apiKey = "42f999f60e30c77921e532020c5ff3e6";
+        double latitude = 46.12556;
+        double longitude = -13.98167;
+        String forecastUrl = "https://api.darksky.net/forecast/" + apiKey +
+                "/" + latitude + "," + longitude + "?lang=sl&units=si";
+
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(forecastUrl)
@@ -59,15 +85,33 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toggleRefresh();
+                    }
+                });
                 e.printStackTrace();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toggleRefresh();
+                    }
+                });
                 try {
                     String jsonData = response.body().string();
                     if (response.isSuccessful()) {
                         mCurrentWeather = getCurrentDetails(jsonData);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateDisplay();
+                            }
+                        });
                     } else {
                         alertUserAboutError();
                     }
@@ -80,6 +124,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void toggleRefresh() {
+        if (mProgressBar.getVisibility() == View.INVISIBLE) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRefreshImageView.setVisibility(View.INVISIBLE);
+        }
+        else{
+            mProgressBar.setVisibility(View.INVISIBLE);
+            mRefreshImageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateDisplay() {
+        mTemperatureLabel.setText(mCurrentWeather.getTemperature() + "");
+        mTimeLabel.setText("Danes ob " + mCurrentWeather.getFormattedTime());
+        mLocationLabel.setText("Cerkno SI");
+        mHumidityValue.setText(mCurrentWeather.getHumidity() + "");
+        mPrecipValue.setText(mCurrentWeather.getPrecipChance() + " %");
+        mSummaryLabel.setText(mCurrentWeather.getSummary());
+        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
+        mIconImageView.setImageDrawable(drawable);
     }
 
     private CurrentWeather getCurrentDetails(String jsonData) throws JSONException {
