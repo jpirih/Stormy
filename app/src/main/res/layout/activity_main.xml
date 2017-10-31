@@ -7,7 +7,7 @@
     android:background="#FFfc970B"
     android:paddingLeft="15dp"
     android:paddingRight="15dp"
-    tools:context="com.kekec_apps.stormy.MainActivity">
+    tools:context="com.kekec_apps.stormy.ui.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"

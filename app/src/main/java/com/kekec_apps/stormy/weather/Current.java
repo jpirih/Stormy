@@ -1,12 +1,14 @@
-package com.kekec_apps.stormy;
+package com.kekec_apps.stormy.weather;
 
 import android.annotation.SuppressLint;
+
+import com.kekec_apps.stormy.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class CurrentWeather {
+public class Current {
 
     private String mIcon;
     private long mTime;
