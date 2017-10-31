@@ -49,18 +49,16 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mProgressBar.setVisibility(View.INVISIBLE);
 
-        if (isNetworkAvailable()) {
-            mRefreshImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getForecast();
-                }
-            });
-            getForecast();
-        }
-        else {
-            Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
-        }
+
+        mRefreshImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getForecast();
+            }
+        });
+        getForecast();
+
+
         Log.v(TAG, "UI in App is running");
 
     }
@@ -76,48 +74,51 @@ public class MainActivity extends AppCompatActivity {
         String forecastUrl = "https://api.darksky.net/forecast/" + apiKey +
                 "/" + latitude + "," + longitude + "?lang=sl&units=si";
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(forecastUrl)
-                .build();
+        if (isNetworkAvailable()) {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(forecastUrl)
+                    .build();
 
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toggleRefresh();
-                    }
-                });
-                e.printStackTrace();
-            }
+            Call call = client.newCall(request);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toggleRefresh();
+                        }
+                    });
+                    e.printStackTrace();
+                }
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    if (response.isSuccessful()) {
-                        mCurrentWeather = getCurrentDetails(jsonData);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateDisplay();
-                            }
-                        });
-                    } else {
-                        alertUserAboutError();
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    try {
+                        String jsonData = response.body().string();
+                        if (response.isSuccessful()) {
+                            mCurrentWeather = getCurrentDetails(jsonData);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateDisplay();
+                                }
+                            });
+                        } else {
+                            alertUserAboutError();
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Exception caught: ", e);
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Exception caught: ", e);
                     }
                 }
-                catch (IOException e) {
-                    Log.e(TAG, "Exception caught: ", e);
-                }
-                catch (JSONException e){
-                    Log.e(TAG, "Exception caught: ", e);
-                }
-            }
-        });
+            });
+        }
+        else {
+            Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void toggleRefresh() {
@@ -133,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateDisplay() {
         toggleRefresh();
-        mTemperatureLabel.setText(mCurrentWeather.getTemperature() + "");
         mTimeLabel.setText("Danes ob " + mCurrentWeather.getFormattedTime());
         mLocationLabel.setText("Cerkno SI");
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "");
