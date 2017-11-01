@@ -1,49 +1,59 @@
 package com.kekec_apps.stormy.weather;
 
 public class Hour {
-    private long mTime;
-    private String mSummary;
-    private double mTemperature;
-    private String mIcon;
-    private String mTimeZone;
+    private long time;
+    private String summary;
+    private String icon;
+    private double temperature;
+    private double humidity;
+    private double pressure;
+
 
     public long getTime() {
-        return mTime;
+        return time;
     }
 
     public void setTime(long time) {
-        mTime = time;
+        this.time = time;
     }
 
     public String getSummary() {
-        return mSummary;
+        return summary;
     }
 
     public void setSummary(String summary) {
-        mSummary = summary;
-    }
-
-    public double getTemperature() {
-        return mTemperature;
-    }
-
-    public void setTemperature(double temperature) {
-        mTemperature = temperature;
+        this.summary = summary;
     }
 
     public String getIcon() {
-        return mIcon;
+        return icon;
     }
 
     public void setIcon(String icon) {
-        mIcon = icon;
+        this.icon = icon;
     }
 
-    public String getTimeZone() {
-        return mTimeZone;
+    public double getTemperature() {
+        return temperature;
     }
 
-    public void setTimeZone(String timeZone) {
-        mTimeZone = timeZone;
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
+    }
+
+    public double getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(double humidity) {
+        this.humidity = humidity;
+    }
+
+    public double getPressure() {
+        return pressure;
+    }
+
+    public void setPressure(double pressure) {
+        this.pressure = pressure;
     }
 }

@@ -4,4 +4,9 @@
     <string name="error_message">There was an error please try again</string>
     <string name="dialog_button_text">Ok</string>
     <string name="network_message">Network is unavailable!</string>
+    <string name="current_time_label">Danes ob %s</string>
+    <string name="current_temperature"> %.0f</string>
+    <string name="current_humidity"> %.2f</string>
+    <string name="current_rain_prob"> %.1f </string>
+    <string name="current_location_label">Ljubljana SI</string>
 </resources>

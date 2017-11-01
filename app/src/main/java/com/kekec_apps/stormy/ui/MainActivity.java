@@ -14,15 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kekec_apps.stormy.R;
 import com.kekec_apps.stormy.weather.Current;
-import com.kekec_apps.stormy.weather.Day;
 import com.kekec_apps.stormy.weather.Forecast;
-import com.kekec_apps.stormy.weather.Hour;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -35,11 +30,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+
 public class MainActivity extends AppCompatActivity {
     // tag
     public static final String TAG = MainActivity.class.getSimpleName();
     // member varialbes
     private Forecast mForecast;
+
     @BindView(R.id.timeTextView) TextView mTimeLabel;
     @BindView(R.id.temperatureTextView) TextView mTemperatureLabel;
     @BindView(R.id.humidityValue) TextView mHumidityValue;
@@ -57,24 +54,22 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mProgressBar.setVisibility(View.INVISIBLE);
 
-
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getForecast();
             }
         });
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
+        }
+        toggleRefresh();
         getForecast();
 
-
         Log.v(TAG, "UI in App is running");
-
     }
 
-
-    // methods
-    private void getForecast() {
-        toggleRefresh();
+    public void getForecast() {
         // connection data
         String apiKey = "42f999f60e30c77921e532020c5ff3e6";
         double latitude = 46.056946;
@@ -90,53 +85,35 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
 
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(forecastUrl)
+                .build();
 
-        if (isNetworkAvailable()) {
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-                    .url(forecastUrl)
-                    .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
 
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            toggleRefresh();
-                        }
-                    });
-                    e.printStackTrace();
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Ops sometning went wrong");
                 }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    try {
-                        String jsonData = response.body().string();
-                        if (response.isSuccessful()) {
-                            mForecast = parseForecastDetails(jsonData);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateDisplay();
-                                }
-                            });
-                        } else {
-                            alertUserAboutError();
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Exception caught: ", e);
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Exception caught: ", e);
+                String jsonData = response.body().string();
+                Gson gson = new Gson();
+                 mForecast = gson.fromJson(jsonData, Forecast.class);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateDisplay();
                     }
-                }
-            });
-        }
-        else {
-            Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
-        }
+                });
+            }
+        });
     }
-
+    // methods
     private void toggleRefresh() {
         if (mProgressBar.getVisibility() == View.INVISIBLE) {
             mProgressBar.setVisibility(View.VISIBLE);
@@ -147,95 +124,17 @@ public class MainActivity extends AppCompatActivity {
             mRefreshImageView.setVisibility(View.VISIBLE);
         }
     }
-
     private void updateDisplay() {
         toggleRefresh();
-        Current current = mForecast.getCurrent();
-        mTimeLabel.setText("Danes ob " + current.getFormattedTime());
-        mLocationLabel.setText("Ljubljana SI");
-        mTemperatureLabel.setText(current.getTemperature() + " ");
-        mHumidityValue.setText(current.getHumidity() + "");
-        mPrecipValue.setText(current.getPrecipChance() + " %");
+        Current current = mForecast.getCurrently();
+        mTimeLabel.setText(getString(R.string.current_time_label, current.getFormattedTime( mForecast.getTimezone())));
+        mLocationLabel.setText(R.string.current_location_label);
+        mTemperatureLabel.setText(getString(R.string.current_temperature, current.getTemperature()));
+        mHumidityValue.setText(getString(R.string.current_humidity, current.getHumidity()));
+        mPrecipValue.setText(getString(R.string.current_rain_prob, current.getPrecipProbability()));
         mSummaryLabel.setText(current.getSummary());
         Drawable drawable = getResources().getDrawable(current.getIconId());
         mIconImageView.setImageDrawable(drawable);
-    }
-
-
-    private Forecast parseForecastDetails(String jsonData) throws JSONException {
-        Forecast forecast = new Forecast();
-        forecast.setCurrent(getCurrentDetails(jsonData));
-        forecast.setHourlyForecast(getHourlyForecast(jsonData));
-        forecast.setDailyForecast(getDaylyForecast(jsonData));
-
-        return forecast;
-    }
-
-    private Day[] getDaylyForecast(String jsonData) throws JSONException {
-        JSONObject forecast = new JSONObject(jsonData);
-        String timezone = forecast.getString("timezone");
-
-        JSONObject daily = forecast.getJSONObject("daily");
-        JSONArray data = daily.getJSONArray("data");
-
-        Day[] days = new Day[data.length()];
-        for(int i = 0; i < data.length(); i++){
-            JSONObject jsonDay = data.getJSONObject(i);
-            Day day = new Day();
-
-            day.setSummary(jsonDay.getString("summary"));
-            day.setTime(jsonDay.getLong("time"));
-            day.setIcon(jsonDay.getString("icon"));
-            day.setTemperatureMax(jsonDay.getDouble("temperatureMax"));
-            day.setTimezone(timezone);
-
-            days[i] = day;
-        }
-
-        return days;
-    }
-
-    private Hour[] getHourlyForecast(String jsonData) throws JSONException {
-        JSONObject forecast = new JSONObject(jsonData);
-        String timezone = forecast.getString("timezone");
-        JSONObject hourly = forecast.getJSONObject("hourly");
-        JSONArray data = hourly.getJSONArray("data");
-
-        Hour[] hours = new Hour[data.length()];
-        for(int i = 0; i < data.length(); i++){
-            JSONObject jsonHour = data.getJSONObject(i);
-            Hour hour = new Hour();
-
-            hour.setSummary(jsonHour.getString("summary"));
-            hour.setTemperature(jsonHour.getDouble("temperature"));
-            hour.setIcon(jsonHour.getString("icon"));
-            hour.setTime(jsonHour.getLong("time"));
-            hour.setTimeZone(timezone);
-
-            hours[i] = hour;
-        }
-
-        return hours;
-    }
-
-    private Current getCurrentDetails(String jsonData) throws JSONException {
-        JSONObject forecast = new JSONObject(jsonData);
-        String timezone = forecast.getString("timezone");
-        JSONObject currently = forecast.getJSONObject("currently");
-
-        Current current = new Current();
-        current.setHumidity(currently.getDouble("humidity"));
-        current.setTime(currently.getLong("time"));
-        current.setIcon(currently.getString("icon"));
-        current.setPrecipChance(currently.getDouble("precipProbability"));
-        current.setSummary(currently.getString("summary"));
-        current.setTemperature(currently.getDouble("temperature"));
-        current.setTimeZone(timezone);
-
-        Log.d(TAG, current.getFormattedTime());
-        Log.d(TAG, current.getSummary());
-        return current;
-
     }
 
     private boolean isNetworkAvailable() {
@@ -248,8 +147,4 @@ public class MainActivity extends AppCompatActivity {
         return isAvailable;
     }
 
-    private void alertUserAboutError() {
-        AlertDialogFragment dialog = new AlertDialogFragment();
-        dialog.show(getFragmentManager(), "error_dialog");
-    }
 }

@@ -10,112 +10,112 @@ import java.util.TimeZone;
 
 public class Current {
 
-    private String mIcon;
-    private long mTime;
-    private double mTemperature;
-    private double mHumidity;
-    private double mPrecipChance;
-    private String mSummary;
-    private String mTimeZone;
+   private long time;
+   private String summary;
+   private String icon;
+   private double temperature;
+   private double humidity;
+   private double pressure;
+   private double precipProbability;
+
+   public long getTime() {
+      return time;
+   }
+
+   public void setTime(long time) {
+      this.time = time;
+   }
+
+   public String getSummary() {
+      return summary;
+   }
+
+   public void setSummary(String summary) {
+      this.summary = summary;
+   }
+
+   public String getIcon() {
+      return icon;
+   }
+
+   public void setIcon(String icon) {
+      this.icon = icon;
+   }
+
+   public double getTemperature() {
+      return temperature;
+   }
+
+   public void setTemperature(double temperature) {
+      this.temperature = temperature;
+   }
+
+   public double getHumidity() {
+      return humidity;
+   }
+
+   public void setHumidity(double humidity) {
+      this.humidity = humidity;
+   }
+
+   public double getPressure() {
+      return pressure;
+   }
+
+   public void setPressure(double pressure) {
+      this.pressure = pressure;
+   }
+
+   public double getPrecipProbability() {
+      return precipProbability;
+   }
+
+   public void setPrecipProbability(double precipProbability) {
+      this.precipProbability = precipProbability;
+   }
 
 
-    public String getIcon() {
-        return mIcon;
-    }
-
-    public void setIcon(String icon) {
-        mIcon = icon;
-    }
-
-    public int getIconId() {
+       public int getIconId() {
         int iconId = R.drawable.clear_day;
 
-        if(mIcon.equals("clear-day")){
+        if(icon.equals("clear-day")){
             iconId = R.drawable.clear_day;
         }
-        else if (mIcon.equals("clear-night")){
+        else if (icon.equals("clear-night")){
             iconId = R.drawable.clear_night;
         }
-        else if (mIcon.equals("rain")) {
+        else if (icon.equals("rain")) {
             iconId = R.drawable.rain;
         }
-        else if (mIcon.equals("snow")) {
+        else if (icon.equals("snow")) {
             iconId = R.drawable.snow;
         }
-        else if (mIcon.equals("sleet")) {
+        else if (icon.equals("sleet")) {
             iconId = R.drawable.sleet;
         }
-        else if (mIcon.equals("wind")) {
+        else if (icon.equals("wind")) {
             iconId = R.drawable.wind;
         }
-        else if (mIcon.equals("fog")) {
+        else if (icon.equals("fog")) {
             iconId = R.drawable.fog;
         }
-        else if (mIcon.equals("cloudy")) {
+        else if (icon.equals("cloudy")) {
             iconId = R.drawable.cloudy;
         }
-        else if (mIcon.equals("partly-cloudy-day")) {
+        else if (icon.equals("partly-cloudy-day")) {
             iconId = R.drawable.partly_cloudy;
         }
-        else if (mIcon.equals("partly-cloudy-night")) {
+        else if (icon.equals("partly-cloudy-night")) {
             iconId = R.drawable.cloudy_night;
         }
 
         return iconId;
     }
 
-    public long getTime() {
-        return mTime;
-    }
+    public String getFormattedTime(String timezone) {
 
-    public void setTime(long time) {
-        mTime = time;
-    }
-
-    public int getTemperature() {
-        return (int) Math.round(mTemperature);
-    }
-
-    public void setTemperature(double temperature) {
-        mTemperature = temperature;
-    }
-
-    public double getHumidity() {
-        return mHumidity;
-    }
-
-    public void setHumidity(double humidity) {
-        mHumidity = humidity;
-    }
-
-    public double getPrecipChance() {
-        double precipPercentage = mPrecipChance * 100;
-        return Math.round(precipPercentage);
-    }
-
-    public void setPrecipChance(double precipChance) {
-        mPrecipChance = precipChance;
-    }
-
-    public String getSummary() {
-        return mSummary;
-    }
-
-    public void setSummary(String summary) {
-        mSummary = summary;
-    }
-
-    public String getTimeZone() {
-        return mTimeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        mTimeZone = timeZone;
-    }
-
-    public String getFormattedTime() {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("H:mm");
-        formatter.setTimeZone(TimeZone.getTimeZone(getTimeZone()));
+        formatter.setTimeZone(TimeZone.getTimeZone(timezone));
         Date datTime = new Date(getTime() * 1000);
         String timeString = formatter.format(datTime);
 
