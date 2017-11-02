@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFfc970B"
+    android:background="@drawable/bg_gradient"
     android:paddingLeft="15dp"
     android:paddingRight="15dp"
     tools:context="com.kekec_apps.stormy.ui.MainActivity">
@@ -131,7 +131,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linearLayout"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:text="Stormy with a chance Meet ballsk"
         android:textSize="18sp"
         android:textColor="#FFFFFFFF"
@@ -154,5 +154,34 @@
         android:layout_alignStart="@+id/refreshimageView"
         android:layout_alignTop="@+id/refreshimageView"
         android:layout_alignBottom="@+id/refreshimageView"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/hourlyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#40FFFFFF"
+            android:textColor="#FFFFFF"
+            android:text="@string/hourly_button" />
+
+        <Button
+            android:id="@+id/dailyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/daily_button"
+            android:textColor="#FFFFFF"
+            android:background="#40FFFFFF"
+            android:layout_marginLeft="2dp"
+            android:layout_marginBottom="15dp"/>
+    </LinearLayout>
 
 </RelativeLayout>

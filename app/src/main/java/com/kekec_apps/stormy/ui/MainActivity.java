@@ -1,6 +1,7 @@
 package com.kekec_apps.stormy.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,16 +14,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.kekec_apps.stormy.R;
 import com.kekec_apps.stormy.weather.Current;
 import com.kekec_apps.stormy.weather.Forecast;
-
 import java.io.IOException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -34,6 +33,8 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
     // tag
     public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String DAILY_FORECAST = "DAILY FORECAST";
+    public static final String HOURLY_FORECAST = "HOURLY FORECAST";
     // member varialbes
     private Forecast mForecast;
 
@@ -46,20 +47,20 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.locationTextView) TextView mLocationLabel;
     @BindView(R.id.refreshimageView) ImageView mRefreshImageView;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         mProgressBar.setVisibility(View.INVISIBLE);
-
+        // refresh button
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getForecast();
             }
         });
+
         if (!isNetworkAvailable()) {
             Toast.makeText(this, R.string.network_message, Toast.LENGTH_LONG).show();
         }
@@ -84,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 .addQueryParameter("units", "si")
                 .build();
 
-
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(forecastUrl)
@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
@@ -146,5 +145,17 @@ public class MainActivity extends AppCompatActivity {
         }
         return isAvailable;
     }
+    @OnClick (R.id.dailyButton)
+    public void startDailyActivity(View view){
+        Intent intent = new Intent(this, DailyForecastActivity.class);
+        intent.putExtra(DAILY_FORECAST, mForecast.getDaily().getData());
+        startActivity(intent);
+    }
 
+    @OnClick(R.id.hourlyButton)
+    public void startHourlyActivity(View view){
+        Intent intent = new Intent(this, HourlyForecastActivity.class);
+        intent.putExtra(HOURLY_FORECAST, mForecast.getHourly().getData());
+        startActivity(intent);
+    }
 }
