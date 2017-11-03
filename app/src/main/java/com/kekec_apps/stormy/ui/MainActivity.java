@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.locationTextView) TextView mLocationLabel;
     @BindView(R.id.refreshimageView) ImageView mRefreshImageView;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         }
         toggleRefresh();
         getForecast();
-
         Log.v(TAG, "UI in App is running");
     }
 
